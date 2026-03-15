@@ -5,8 +5,7 @@ import random
 from collections.abc import Awaitable, Callable
 
 from cat.services.model_providers.base import ModelProvider
-from cat.protocols.model_context.type_wrappers import TextContent
-from cat.types import Message
+from cat.types import Message, TextContent, ToolCall
 
 from cat.mad_hatter.decorators import Tool
 
@@ -34,6 +33,7 @@ class HelloWorldModelProvider(ModelProvider):
         system_prompt: str = "",
         tools: list["Tool"] = [],
         on_token: Callable[[str], Awaitable[None]] | None = None,
+        on_tool_call: Callable[[ToolCall], Awaitable[None]] | None = None,
     ) -> Message:
         
         log.info("Hello World: LLM simulator has received a call")
@@ -56,7 +56,7 @@ class HelloWorldModelProvider(ModelProvider):
             )
  
         # if we already have the current time simulate a LLM response using the tool call result
-        if messages[-1].role == "tool" and messages[-1].tool_name == "what_time_is_it":
+        if messages[-1].role == "tool" and messages[-1].tool_call_id == "dummy_tool_call_id":
             text = f"The current time is `{messages[-1].text}`"
             return Message(role="assistant", content=[TextContent(text=text)])
             
